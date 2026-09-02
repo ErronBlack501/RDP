@@ -2,6 +2,23 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import type { PetriNetCreate } from "#/types/petri";
 import { petriApiClient } from "#/lib/api";
+import {
+  Container,
+  Heading,
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  Textarea,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  Card,
+  CardBody,
+  VStack,
+  useColorModeValue,
+} from "@chakra-ui/react";
 
 export function CreatePetriNet() {
   const [formData, setFormData] = useState<PetriNetCreate>({
@@ -12,6 +29,8 @@ export function CreatePetriNet() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const cardBg = useColorModeValue("white", "gray.800");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,62 +61,73 @@ export function CreatePetriNet() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-6">Create Petri Net</h1>
+    <Container maxW="container.md" py={6}>
+      <Heading size="2xl" mb={6}>Create Petri Net</Heading>
 
-      <Link
+      <Button
+        as={Link}
         to="/nets"
-        className="inline-block mb-4 text-blue-500 hover:text-blue-600"
+        variant="ghost"
+        colorScheme="blue"
+        mb={4}
       >
         ← Back to Petri Nets
-      </Link>
+      </Button>
 
       {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-          Petri net created successfully!
-        </div>
+        <Alert status="success" mb={4}>
+          <AlertIcon />
+          <AlertTitle>Success!</AlertTitle>
+          <AlertDescription>Petri net created successfully!</AlertDescription>
+        </Alert>
       )}
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
+        <Alert status="error" mb={4}>
+          <AlertIcon />
+          <AlertTitle>Error!</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="border rounded px-3 py-2 w-full"
-            required
-            placeholder="e.g., Production System"
-          />
-        </div>
+      <Card bg={cardBg} boxShadow="md">
+        <CardBody>
+          <form onSubmit={handleSubmit}>
+            <VStack spacing={4}>
+              <FormControl isRequired>
+                <FormLabel>Name</FormLabel>
+                <Input
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="e.g., Production System"
+                />
+              </FormControl>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            className="border rounded px-3 py-2 w-full"
-            rows={3}
-            placeholder="Optional description of the Petri net"
-          />
-        </div>
+              <FormControl>
+                <FormLabel>Description</FormLabel>
+                <Textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={3}
+                  placeholder="Optional description of the Petri net"
+                />
+              </FormControl>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 w-full"
-        >
-          {loading ? "Creating..." : "Create Petri Net"}
-        </button>
-      </form>
-    </div>
+              <Button
+                type="submit"
+                colorScheme="blue"
+                isLoading={loading}
+                loadingText="Creating..."
+                width="full"
+              >
+                Create Petri Net
+              </Button>
+            </VStack>
+          </form>
+        </CardBody>
+      </Card>
+    </Container>
   );
 }

@@ -2,6 +2,27 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import type { PetriNet, Place, Transition, Arc, Position } from "#/types/petri";
 import { petriApiClient } from "#/lib/api";
+import {
+  Container,
+  Heading,
+  Button,
+  Flex,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  Card,
+  CardBody,
+  HStack,
+  ButtonGroup,
+  Text,
+  useColorModeValue,
+  Box,
+  VStack,
+  UnorderedList,
+  ListItem,
+  Spinner,
+} from "@chakra-ui/react";
 
 export function PetriNetEditor() {
   const { netId } = useParams({ from: "/net/$netId" });
@@ -12,6 +33,13 @@ export function PetriNetEditor() {
   const [selectedElement, setSelectedElement] = useState<{ type: "place" | "transition" | "arc"; id: string } | null>(null);
   const [arcSource, setArcSource] = useState<string | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  const cardBg = useColorModeValue("white", "gray.800");
+  const toolbarBg = useColorModeValue("gray.100", "gray.700");
+  const canvasBg = useColorModeValue("white", "gray.900");
+  const infoBg = useColorModeValue("gray.100", "gray.700");
+  const textColor = useColorModeValue("gray.600", "gray.300");
+  const textColor2 = useColorModeValue("gray.700", "gray.200");
 
   useEffect(() => {
     loadNet();
@@ -147,190 +175,265 @@ export function PetriNetEditor() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading Petri net...</div>
-      </div>
+      <Flex justify="center" align="center" minH="100vh">
+        <Spinner size="xl" />
+      </Flex>
     );
   }
 
   if (!net) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-red-500">Petri net not found</div>
-        <Link to="/nets" className="text-blue-500">Back to Petri nets</Link>
-      </div>
+      <Container maxW="container.xl" py={6}>
+        <Text color="red.500" fontSize="lg">Petri net not found</Text>
+        <Button
+          as={Link}
+          to="/nets"
+          colorScheme="blue"
+          mt={4}
+        >
+          Back to Petri nets
+        </Button>
+      </Container>
     );
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <Link to="/nets" className="text-blue-500 hover:text-blue-600">
+    <Container maxW="container.xl" py={6}>
+      <Flex justify="space-between" align="start" mb={6}>
+        <Box>
+          <Button
+            as={Link}
+            to="/nets"
+            variant="ghost"
+            colorScheme="blue"
+            mb={2}
+          >
             ← Back to Petri Nets
-          </Link>
-          <h1 className="text-3xl font-bold mt-2">{net.name}</h1>
-          {net.description && <p className="text-gray-600">{net.description}</p>}
-        </div>
-        <Link
+          </Button>
+          <Heading size="2xl">{net.name}</Heading>
+          {net.description && <Text color={textColor}>{net.description}</Text>}
+        </Box>
+        <Button
+          as={Link}
           to="/simulate/$netId"
           params={{ netId: net.id }}
-          className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+          colorScheme="purple"
         >
           Simulate
-        </Link>
-      </div>
+        </Button>
+      </Flex>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
+        <Alert status="error" mb={4}>
+          <AlertIcon />
+          <AlertTitle>Error!</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Toolbar */}
-      <div className="bg-gray-100 p-3 rounded mb-4 flex gap-2">
-        <button
-          onClick={() => setMode("select")}
-          className={`px-3 py-1 rounded ${mode === "select" ? "bg-blue-500 text-white" : "bg-white"}`}
-        >
-          Select
-        </button>
-        <button
-          onClick={() => setMode("place")}
-          className={`px-3 py-1 rounded ${mode === "place" ? "bg-blue-500 text-white" : "bg-white"}`}
-        >
-          Add Place
-        </button>
-        <button
-          onClick={() => setMode("transition")}
-          className={`px-3 py-1 rounded ${mode === "transition" ? "bg-blue-500 text-white" : "bg-white"}`}
-        >
-          Add Transition
-        </button>
-        <button
-          onClick={() => setMode("arc")}
-          className={`px-3 py-1 rounded ${mode === "arc" ? "bg-blue-500 text-white" : "bg-white"}`}
-        >
-          Add Arc
-        </button>
-        {selectedElement && (
-          <button
-            onClick={handleDeleteElement}
-            className="px-3 py-1 rounded bg-red-500 text-white"
-          >
-            Delete Selected
-          </button>
-        )}
-        {arcSource && (
-          <div className="text-sm text-gray-600 self-center">
-            Select target for arc...
-          </div>
-        )}
-      </div>
+      <Card bg={toolbarBg} mb={4}>
+        <CardBody>
+          <HStack spacing={2} flexWrap="wrap">
+            <Button
+              onClick={() => setMode("select")}
+              colorScheme={mode === "select" ? "blue" : "gray"}
+              size="sm"
+            >
+              Select
+            </Button>
+            <Button
+              onClick={() => setMode("place")}
+              colorScheme={mode === "place" ? "blue" : "gray"}
+              size="sm"
+            >
+              Add Place
+            </Button>
+            <Button
+              onClick={() => setMode("transition")}
+              colorScheme={mode === "transition" ? "blue" : "gray"}
+              size="sm"
+            >
+              Add Transition
+            </Button>
+            <Button
+              onClick={() => setMode("arc")}
+              colorScheme={mode === "arc" ? "blue" : "gray"}
+              size="sm"
+            >
+              Add Arc
+            </Button>
+            {selectedElement && (
+              <Button
+                onClick={handleDeleteElement}
+                colorScheme="red"
+                size="sm"
+              >
+                Delete Selected
+              </Button>
+            )}
+            {arcSource && (
+              <Text color={textColor} fontSize="sm">
+                Select target for arc...
+              </Text>
+            )}
+          </HStack>
+        </CardBody>
+      </Card>
 
       {/* Canvas */}
-      <div
+      <Box
         ref={canvasRef}
-        className="border-2 border-dashed border-gray-300 rounded bg-white relative"
-        style={{ height: "600px", cursor: mode === "select" ? "default" : "crosshair" }}
+        border="2px"
+        borderStyle="dashed"
+        borderColor="gray.300"
+        borderRadius="md"
+        bg={canvasBg}
+        position="relative"
+        h="600px"
+        cursor={mode === "select" ? "default" : "crosshair"}
         onClick={handleCanvasClick}
+        mb={4}
       >
         {/* Render arcs */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none">
-          {net.arcs.map((arc) => {
-            const source = [...net.places, ...net.transitions].find(n => n.id === arc.source_id);
-            const target = [...net.places, ...net.transitions].find(n => n.id === arc.target_id);
-            if (!source || !target) return null;
+        <Box position="absolute" inset={0} pointerEvents="none">
+          <svg width="100%" height="100%">
+            {net.arcs.map((arc) => {
+              const source = [...net.places, ...net.transitions].find(n => n.id === arc.source_id);
+              const target = [...net.places, ...net.transitions].find(n => n.id === arc.target_id);
+              if (!source || !target) return null;
 
-            return (
-              <line
-                key={arc.id}
-                x1={source.position.x}
-                y1={source.position.y}
-                x2={target.position.x}
-                y2={target.position.y}
-                stroke={arc.arc_type === "input" ? "#3B82F6" : "#10B981"}
-                strokeWidth="2"
-                markerEnd={arc.arc_type === "input" ? "url(#arrowhead-input)" : "url(#arrowhead-output)"}
-              />
-            );
-          })}
-          <defs>
-            <marker id="arrowhead-input" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
-            </marker>
-            <marker id="arrowhead-output" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
-            </marker>
-          </defs>
-        </svg>
+              return (
+                <line
+                  key={arc.id}
+                  x1={source.position.x}
+                  y1={source.position.y}
+                  x2={target.position.x}
+                  y2={target.position.y}
+                  stroke={arc.arc_type === "input" ? "#3B82F6" : "#10B981"}
+                  strokeWidth="2"
+                  markerEnd={arc.arc_type === "input" ? "url(#arrowhead-input)" : "url(#arrowhead-output)"}
+                />
+              );
+            })}
+            <defs>
+              <marker id="arrowhead-input" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+              </marker>
+              <marker id="arrowhead-output" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
+              </marker>
+            </defs>
+          </svg>
+        </Box>
 
         {/* Render places */}
         {net.places.map((place) => (
-          <div
+          <Box
             key={place.id}
-            className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer ${
-              selectedElement?.type === "place" && selectedElement.id === place.id ? "ring-2 ring-blue-500" : ""
-            } ${arcSource === place.id ? "ring-2 ring-yellow-500" : ""}`}
-            style={{ left: place.position.x, top: place.position.y }}
+            position="absolute"
+            transform="translate(-50%, -50%)"
+            cursor="pointer"
+            left={`${place.position.x}px`}
+            top={`${place.position.y}px`}
             onClick={(e) => handleElementClick(e, "place", place.id)}
+            ring={selectedElement?.type === "place" && selectedElement.id === place.id ? "2px solid blue" : arcSource === place.id ? "2px solid yellow" : "none"}
           >
-            <div className="w-16 h-16 rounded-full border-4 border-gray-800 bg-white flex items-center justify-center relative">
-              <span className="font-bold">{place.tokens}</span>
-              <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs whitespace-nowrap">
+            <Box
+              w="64px"
+              h="64px"
+              borderRadius="full"
+              border="4px"
+              borderColor="gray.800"
+              bg="white"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              position="relative"
+            >
+              <Text fontWeight="bold">{place.tokens}</Text>
+              <Box
+                position="absolute"
+                bottom="-24px"
+                left="50%"
+                transform="translateX(-50%)"
+                fontSize="xs"
+                whiteSpace="nowrap"
+              >
                 {place.name}
-              </div>
-            </div>
+              </Box>
+            </Box>
             {selectedElement?.type === "place" && selectedElement.id === place.id && (
-              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 flex gap-1">
-                <button
+              <HStack position="absolute" top="-32px" left="50%" transform="translateX(-50%)" gap={1}>
+                <Button
+                  size="xs"
+                  colorScheme="red"
                   onClick={(e) => { e.stopPropagation(); handleTokensChange(place.id, -1); }}
-                  className="bg-red-500 text-white px-2 py-1 rounded text-xs"
                 >
                   -
-                </button>
-                <button
+                </Button>
+                <Button
+                  size="xs"
+                  colorScheme="green"
                   onClick={(e) => { e.stopPropagation(); handleTokensChange(place.id, 1); }}
-                  className="bg-green-500 text-white px-2 py-1 rounded text-xs"
                 >
                   +
-                </button>
-              </div>
+                </Button>
+              </HStack>
             )}
-          </div>
+          </Box>
         ))}
 
         {/* Render transitions */}
         {net.transitions.map((transition) => (
-          <div
+          <Box
             key={transition.id}
-            className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer ${
-              selectedElement?.type === "transition" && selectedElement.id === transition.id ? "ring-2 ring-blue-500" : ""
-            } ${arcSource === transition.id ? "ring-2 ring-yellow-500" : ""}`}
-            style={{ left: transition.position.x, top: transition.position.y }}
+            position="absolute"
+            transform="translate(-50%, -50%)"
+            cursor="pointer"
+            left={`${transition.position.x}px`}
+            top={`${transition.position.y}px`}
             onClick={(e) => handleElementClick(e, "transition", transition.id)}
+            ring={selectedElement?.type === "transition" && selectedElement.id === transition.id ? "2px solid blue" : arcSource === transition.id ? "2px solid yellow" : "none"}
           >
-            <div className="w-12 h-12 bg-gray-800 flex items-center justify-center relative">
-              <div className="w-1 h-8 bg-white"></div>
-              <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs whitespace-nowrap">
+            <Box
+              w="48px"
+              h="48px"
+              bg="gray.800"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              position="relative"
+            >
+              <Box w="4px" h="32px" bg="white" />
+              <Box
+                position="absolute"
+                bottom="-24px"
+                left="50%"
+                transform="translateX(-50%)"
+                fontSize="xs"
+                whiteSpace="nowrap"
+              >
                 {transition.name}
-              </div>
-            </div>
-          </div>
+              </Box>
+            </Box>
+          </Box>
         ))}
-      </div>
+      </Box>
 
       {/* Info panel */}
-      <div className="mt-4 bg-gray-100 p-4 rounded">
-        <h3 className="font-semibold mb-2">Instructions:</h3>
-        <ul className="text-sm space-y-1">
-          <li>• Select "Add Place" and click on canvas to add places</li>
-          <li>• Select "Add Transition" and click on canvas to add transitions</li>
-          <li>• Select "Add Arc", click source, then click target to connect</li>
-          <li>• Click on places to select and adjust token count</li>
-          <li>• Use "Delete Selected" to remove elements</li>
-        </ul>
-      </div>
-    </div>
+      <Card bg={infoBg}>
+        <CardBody>
+          <Heading size="md" mb={2}>Instructions:</Heading>
+          <UnorderedList spacing={1} fontSize="sm">
+            <ListItem>Select "Add Place" and click on canvas to add places</ListItem>
+            <ListItem>Select "Add Transition" and click on canvas to add transitions</ListItem>
+            <ListItem>Select "Add Arc", click source, then click target to connect</ListItem>
+            <ListItem>Click on places to select and adjust token count</ListItem>
+            <ListItem>Use "Delete Selected" to remove elements</ListItem>
+          </UnorderedList>
+        </CardBody>
+      </Card>
+    </Container>
   );
 }

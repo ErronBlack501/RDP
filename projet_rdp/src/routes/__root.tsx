@@ -2,6 +2,14 @@ import { Outlet, createRootRoute, Link } from '@tanstack/react-router'
 
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import {
+  Box,
+  Flex,
+  Heading,
+  Button,
+  Container,
+  useColorModeValue,
+} from '@chakra-ui/react'
 
 import '../styles.css'
 
@@ -10,24 +18,47 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  const bg = useColorModeValue('blue.600', 'blue.800')
+  const hoverBg = useColorModeValue('blue.700', 'blue.900')
+
   return (
     <>
-      <nav className="bg-blue-600 text-white p-4 shadow-md">
-        <div className="container mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-bold">Petri Net Simulation</h1>
-          <div className="flex gap-4">
-            <Link to="/" className="hover:text-blue-200 transition-colors">
-              Home
-            </Link>
-            <Link to="/nets" className="hover:text-blue-200 transition-colors">
-              Petri Nets
-            </Link>
-            <Link to="/create-net" className="hover:text-blue-200 transition-colors">
-              Create Net
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Box bg={bg} color="white" py={4} boxShadow="md">
+        <Container maxW="container.xl">
+          <Flex justify="space-between" align="center">
+            <Heading size="lg">Petri Net Simulation</Heading>
+            <Flex gap={4}>
+              <Button
+                as={Link}
+                to="/"
+                variant="ghost"
+                color="white"
+                _hover={{ bg: hoverBg }}
+              >
+                Home
+              </Button>
+              <Button
+                as={Link}
+                to="/nets"
+                variant="ghost"
+                color="white"
+                _hover={{ bg: hoverBg }}
+              >
+                Petri Nets
+              </Button>
+              <Button
+                as={Link}
+                to="/create-net"
+                variant="ghost"
+                color="white"
+                _hover={{ bg: hoverBg }}
+              >
+                Create Net
+              </Button>
+            </Flex>
+          </Flex>
+        </Container>
+      </Box>
       <Outlet />
       <TanStackDevtools
         config={{

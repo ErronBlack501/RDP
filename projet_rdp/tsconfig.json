@@ -1,9 +1,9 @@
 {
   "include": ["**/*.ts", "**/*.tsx"],
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "esnext",
     "jsx": "react-jsx",
-    "module": "ESNext",
+    "module": "esnext",
     "paths": {
       "#/*": ["./src/*"],
       "@/*": ["./src/*"]

@@ -2,11 +2,35 @@ import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import type { PetriNet } from "#/types/petri";
 import { petriApiClient } from "#/lib/api";
+import {
+  Box,
+  Container,
+  Heading,
+  Button,
+  SimpleGrid,
+  Card,
+  CardBody,
+  Text,
+  Flex,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  Spinner,
+  useColorModeValue,
+  HStack,
+  Badge,
+} from "@chakra-ui/react";
 
 export function PetriNetList() {
   const [nets, setNets] = useState<PetriNet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const cardBg = useColorModeValue("white", "gray.800");
+  const cardHoverBg = useColorModeValue("gray.50", "gray.700");
+  const textColor = useColorModeValue("gray.600", "gray.300");
+  const textColor2 = useColorModeValue("gray.700", "gray.200");
 
   const loadNets = async () => {
     try {
@@ -38,90 +62,110 @@ export function PetriNetList() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading Petri nets...</div>
-      </div>
+      <Flex justify="center" align="center" minH="100vh">
+        <Spinner size="xl" />
+      </Flex>
     );
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Petri Nets</h1>
-        <Link
+    <Container maxW="container.xl" py={6}>
+      <Flex justify="space-between" align="center" mb={6}>
+        <Heading size="2xl">Petri Nets</Heading>
+        <Button
+          as={Link}
           to="/create-net"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          colorScheme="blue"
         >
           Create New Net
-        </Link>
-      </div>
+        </Button>
+      </Flex>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
+        <Alert status="error" mb={4}>
+          <AlertIcon />
+          <AlertTitle>Error!</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      <div className="grid gap-4">
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
         {nets.length === 0 ? (
-          <div className="text-gray-500 text-center py-8">
-            No Petri nets found. Create your first one!
-          </div>
+          <Box gridColumn="1 / -1" textAlign="center" py={8}>
+            <Text color={textColor} fontSize="lg">
+              No Petri nets found. Create your first one!
+            </Text>
+          </Box>
         ) : (
           nets.map((net) => (
-            <div
+            <Card
               key={net.id}
-              className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
+              bg={cardBg}
+              _hover={{ bg: cardHoverBg, transform: "translateY(-2px)" }}
+              transition="all 0.2s"
+              boxShadow="sm"
+              _hover={{ boxShadow: "md" }}
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-lg">{net.name}</h3>
-                <span className="text-sm text-gray-500">
-                  {new Date(net.created_at).toLocaleDateString()}
-                </span>
-              </div>
+              <CardBody>
+                <Flex justify="space-between" align="start" mb={3}>
+                  <Heading size="md">{net.name}</Heading>
+                  <Badge colorScheme="blue" fontSize="xs">
+                    {new Date(net.created_at).toLocaleDateString()}
+                  </Badge>
+                </Flex>
 
-              {net.description && (
-                <p className="text-gray-600 mb-3">{net.description}</p>
-              )}
+                {net.description && (
+                  <Text color={textColor} mb={3} noOfLines={2}>
+                    {net.description}
+                  </Text>
+                )}
 
-              <div className="grid grid-cols-3 gap-2 text-sm mb-3">
-                <div>
-                  <span className="font-medium">Places:</span> {net.places.length}
-                </div>
-                <div>
-                  <span className="font-medium">Transitions:</span> {net.transitions.length}
-                </div>
-                <div>
-                  <span className="font-medium">Arcs:</span> {net.arcs.length}
-                </div>
-              </div>
+                <HStack spacing={4} mb={4}>
+                  <Text fontSize="sm" color={textColor}>
+                    <strong>Places:</strong> {net.places.length}
+                  </Text>
+                  <Text fontSize="sm" color={textColor}>
+                    <strong>Transitions:</strong> {net.transitions.length}
+                  </Text>
+                  <Text fontSize="sm" color={textColor}>
+                    <strong>Arcs:</strong> {net.arcs.length}
+                  </Text>
+                </HStack>
 
-              <div className="flex gap-2">
-                <Link
-                  to="/net/$netId"
-                  params={{ netId: net.id }}
-                  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm"
-                >
-                  View & Edit
-                </Link>
-                <Link
-                  to="/simulate/$netId"
-                  params={{ netId: net.id }}
-                  className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 text-sm"
-                >
-                  Simulate
-                </Link>
-                <button
-                  onClick={() => handleDelete(net.id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+                <Flex gap={2} wrap="wrap">
+                  <Button
+                    as={Link}
+                    to="/net/$netId"
+                    params={{ netId: net.id }}
+                    size="sm"
+                    colorScheme="green"
+                    flex={1}
+                  >
+                    View & Edit
+                  </Button>
+                  <Button
+                    as={Link}
+                    to="/simulate/$netId"
+                    params={{ netId: net.id }}
+                    size="sm"
+                    colorScheme="purple"
+                    flex={1}
+                  >
+                    Simulate
+                  </Button>
+                  <Button
+                    onClick={() => handleDelete(net.id)}
+                    size="sm"
+                    colorScheme="red"
+                  >
+                    Delete
+                  </Button>
+                </Flex>
+              </CardBody>
+            </Card>
           ))
         )}
-      </div>
-    </div>
+      </SimpleGrid>
+    </Container>
   );
 }
